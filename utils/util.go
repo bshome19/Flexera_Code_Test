@@ -1,49 +1,23 @@
 package utils
 
 import (
-	"strings"
-	"github.com/bshome19/Flexera_Code_Test/models"
+	"encoding/csv"
+	"fmt"
+	"os"
 )
 
-const applicationID = "374"
-
-func CalculateMinNumberOfCopies(records [][]string) int {
-	desktopMap := make(map[string]bool)
-	minimumCopies := 0
-	duplicateCheck := make(map[string]bool)
-
-	slice1 := []models.ABC{}
-
-	for _, record := range records[1:] {		
-
-		recordsData := models.ABC{
-
-			ComputerID:    record[0],
-			UserID:        record[1],
-			ApplicationID: record[2],
-			ComputerType:  strings.ToUpper(record[3]),
-			Comment:       record[4],
-		}
-
-		uniqueKey := recordsData.UserID + "_" + recordsData.ComputerID
-		if duplicateCheck[uniqueKey] || recordsData.ApplicationID != applicationID {
-			continue
-		} 
-
-		slice1 = append(slice1, recordsData)
-		duplicateCheck[uniqueKey] = true
-
-		if recordsData.ComputerType == "DESKTOP" {
-			desktopMap[recordsData.UserID] = true
-			minimumCopies += 1
-		}
-
+func ReadCSV(filepath string) [][]string {
+	file, err := os.Open(filepath)
+	if err != nil {
+		fmt.Println("Error opening CSV file:", err)
 	}
+	defer file.Close()
 
-	for _, record := range slice1 {
-		if record.ComputerType == "LAPTOP" && desktopMap[record.UserID] != true {
-				minimumCopies += 1
-			}
+	reader := csv.NewReader(file)
+
+	records, err := reader.ReadAll()
+	if err != nil {
+		fmt.Println("Error reading CSV records:", err)
 	}
-	return minimumCopies
+	return records
 }
